@@ -1030,7 +1030,10 @@
         openBtn.innerHTML = stampImageHTML;
 
 
-        const imgContainers = ['.js-product-slide', '.product-image-column', '.js-swiper-product', '[data-store^="product-image-"]', '.product__media-wrapper', '.product-gallery__media', '.product__media', '.product-image-main', '.product-media-container', '[data-media-id]', '.product__media-item', '.product-gallery', '.product-single__media', '.media-gallery'];
+        // .product-image-container PRIMEIRO: é o wrapper estável da galeria (overflow visível).
+        // As .js-product-slide são slides do swiper com overflow:hidden → o selo era clipado
+        // (caía fora da área visível do slide) e não aparecia. Ver Ves 23/07.
+        const imgContainers = ['.product-image-container', '.js-product-slide', '.product-image-column', '.js-swiper-product', '[data-store^="product-image-"]', '.product__media-wrapper', '.product-gallery__media', '.product__media', '.product-image-main', '.product-media-container', '[data-media-id]', '.product__media-item', '.product-gallery', '.product-single__media', '.media-gallery'];
 
         function tryPlaceTriggerBtn() {
             // 1ª prioridade: container que tenha <img> dentro (evita cair em slide de vídeo)
@@ -1168,6 +1171,22 @@
         }
 
         function extractImages() {
+            // Prioridade: imagem da variação (COR) selecionada — Nuvemshop marca com .js-active-variant.
+            // Sem isto, a galeria traz as fotos de todas as cores e ia sempre a 1ª (bug da variante).
+            const activeVariantImgs = Array.from(document.querySelectorAll('.js-product-slide-img.js-active-variant'));
+            if (activeVariantImgs.length) {
+                const variantUrls = [];
+                activeVariantImgs.forEach(img => {
+                    let src = img.getAttribute('data-srcset') || img.dataset?.srcset || img.getAttribute('data-src') || img.src;
+                    if (!src) return;
+                    src = src.split(',')[0].trim().split(' ')[0];
+                    if (src.startsWith('//')) src = 'https:' + src;
+                    if (!src || src.includes('data:image') || src.includes('empty-placeholder')) return;
+                    const up = upgradeImgUrl(src);
+                    if (!variantUrls.includes(up)) variantUrls.push(up);
+                });
+                if (variantUrls.length) return variantUrls.slice(0, 4);
+            }
             const containersSelectors = '.js-product-slide, .product-image-column, .js-swiper-product, [data-store^="product-image-"], .product__media-wrapper, .product-gallery__media, .product__media, .product-image-main, .product-media-container, [data-media-id], .product__media-item, .product-gallery, .product-single__media, .media-gallery, [data-component="product.gallery"], .swiper-slide:not(.swiper-slide-duplicate), .slider-wrapper';
             const possibleContainers = Array.from(document.querySelectorAll(containersSelectors));
             let imgEls = [];
