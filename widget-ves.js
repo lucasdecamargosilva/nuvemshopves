@@ -1932,24 +1932,14 @@ const fd = new FormData();
                             }
                         }
                     } catch (_) {}
-                    // Detecção de rosto: manda 1 foto no rosto como PRINCIPAL (o gerador usa pra
-                    // calibrar a proporção/tamanho do óculos) + as fotos de fundo branco (packshot),
-                    // que mostram os detalhes da armação. Assim garante proporção E detalhe.
-                    // Sem rosto detectado → mantém as fotos default (fallback, sem regressão).
+                    // SO A FOTO NO ROSTO (pedido do Lucas em 31/08/2026, igualando Menina Flor,
+                    // Cand e Sunrise). Antes ia rosto + packshots: o packshot deitado no fundo
+                    // branco confunde o gerador no tamanho e no posicionamento da armacao.
+                    // Sem rosto detectado -> mantem as fotos default (fallback, sem regressao).
                     try {
                         if (faceDetectPromise) { await Promise.race([faceDetectPromise, new Promise(function (r) { setTimeout(r, 4000); })]); }
                         if (_faceUrls && _faceUrls.length) {
-                            var _key = function (u) { return String(u || '').split('?')[0]; };
-                            var _faceKeys = {};
-                            _faceUrls.forEach(function (u) { _faceKeys[_key(u)] = 1; });
-                            var _packshots = allProdImgs.filter(function (u) { return !_faceKeys[_key(u)]; });
-                            var _mix = [];
-                            var _add = function (u) { if (u && !_mix.some(function (x) { return _key(x) === _key(u); })) _mix.push(u); };
-                            _add(_faceUrls[0]);
-                            _packshots.forEach(_add);
-                            _faceUrls.slice(1).forEach(_add);
-                            allProdImgs.forEach(_add);
-                            allProdImgs = _mix;
+                            allProdImgs = [_faceUrls[0]];
                         }
                     } catch (e) {}
                     allProdImgs = allProdImgs.slice(0, 4);
