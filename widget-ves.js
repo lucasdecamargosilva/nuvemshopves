@@ -1946,6 +1946,25 @@ const fd = new FormData();
                         }
                     } catch (e) {}
                     allProdImgs = allProdImgs.slice(0, 4);
+                    // Fotos FIXAS por produto (pedido do Lucas): estes produtos sempre usam
+                    // estas referencias, ignorando galeria e deteccao de rosto. Chave = trechos
+                    // do slug na URL (minusculo). Vence tudo porque roda por ultimo.
+                    try {
+                        var _pu = String(window.location.href || '').toLowerCase();
+                        var _pins = [
+                            { quando: ['leticia', 'tartaruga', 'verde'], fotos: [
+                                'https://acdn-us.mitiendanube.com/stores/005/170/064/products/dsc03275-075a45eabf0cda538217880227122340-1024-1024.webp',
+                                'https://acdn-us.mitiendanube.com/stores/005/170/064/products/dsc03273-1f208bdbdf1e6f7dda17880227124820-1024-1024.webp'
+                            ] }
+                        ];
+                        for (var _pi = 0; _pi < _pins.length; _pi++) {
+                            if (_pins[_pi].quando.every(function (k) { return _pu.indexOf(k) !== -1; })) {
+                                allProdImgs = _pins[_pi].fotos.slice();
+                                console.log('[PL Ves] fotos FIXAS do produto:', allProdImgs.length);
+                                break;
+                            }
+                        }
+                    } catch (e) {}
                     console.log('[PL Ves] Enviando', allProdImgs.length, 'fotos do produto');
                     // A 1ª imagem VÁLIDA vira a principal (binary product_image); as demais vão
                     // como base64. Sem isso, se a posição 0 (ex: og:image http/mixed-content) falhava,
