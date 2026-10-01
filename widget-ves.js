@@ -1171,7 +1171,21 @@
             return url;
         }
 
+            // ── PL variante: foto da COR selecionada (data-variants + selects da variação) ──
+    function plSelVarImg() {
+        try {
+            var pv = document.querySelector('.js-product-variants'); var c = pv && pv.closest('[data-variants]'); if (!c) return '';
+            var vs = JSON.parse(c.getAttribute('data-variants') || '[]'); if (!vs || vs.length < 2) return '';
+            var imgs = {}; vs.forEach(function (v) { if (v.image_url) imgs[v.image_url] = 1; }); if (Object.keys(imgs).length < 2) return '';
+            var sel = []; c.querySelectorAll('select.js-variation-option, select[name^="variation"]').forEach(function (s) { var m = String(s.name || '').match(/\[(\d)\]/); sel[m ? +m[1] : sel.length] = s.value; });
+            if (!sel.length) return '';
+            var v = vs.find(function (x) { return sel.every(function (val, i) { return val == null || String(x['option' + i] || '') === String(val); }); });
+            var u = v && v.image_url ? String(v.image_url) : ''; if (u.indexOf('//') === 0) u = 'https:' + u; return u;
+        } catch (e) { return ''; }
+    }
         function extractImages() {
+            // cor escolhida pelo cliente vence a galeria (que mistura todas as cores)
+            if (!document.querySelector('.js-product-slide-img.js-active-variant')) { const _plv = plSelVarImg(); if (_plv) return [_plv]; }
             // Prioridade: imagem da variação (COR) selecionada — Nuvemshop marca com .js-active-variant.
             // Sem isto, a galeria traz as fotos de todas as cores e ia sempre a 1ª (bug da variante).
             const activeVariantImgs = Array.from(document.querySelectorAll('.js-product-slide-img.js-active-variant'));
