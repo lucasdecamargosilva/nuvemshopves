@@ -992,6 +992,8 @@
 
 
     function init() {
+        // PROVADOR DESLIGADO (05/10/2026, pedido do Lucas). Religar = PL_PROVADOR_OFF = false.
+        var PL_PROVADOR_OFF = true; if (PL_PROVADOR_OFF) return;
         // --- FILTRO DE CATEGORIA (HAT) ---
         const productNameNormalized = (document.querySelector('h1.js-product-name,h1.product__title,.product-single__title,h1')?.innerText || document.title).toUpperCase();
         if (false) { // filtro HAT desativado p/ Ves
